@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>✊✋✌️ 剪刀石頭布 終極大對決 — Python 冒險遊戲網頁版</title>
+  <style>
+    :root {
+      --bg-dark: #0b1120;
+      --bg-card: #131c31;
+      --bg-panel: #1b2640;
+      --border-subtle: rgba(148, 163, 184, 0.18);
+      --gold: #fbbf24;
+      --gold-glow: rgba(251, 191, 36, 0.25);
+      --cyan: #38bdf8;
+      --emerald: #10b981;
+      --rose: #f43f5e;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --font-sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, -apple-system, sans-serif;
+      --font-mono: "JetBrains Mono", "Fira Code", Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: radial-gradient(circle at top, #1e1b4b 0%, var(--bg-dark) 60%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 48px;
+      line-height: 1.6;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 760px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      padding: 12px 0 4px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(251, 191, 36, 0.12);
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      color: var(--gold);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 4px 14px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+      letter-spacing: 0.04em;
+    }
+
+    header h1 {
+      font-size: clamp(1.65rem, 4vw, 2.25rem);
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      background: linear-gradient(135deg, #ffffff 20%, #fde68a 60%, #fbbf24 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* Card Base */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Step 1: Login Form */
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-main);
+      font-size: 0.96rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: var(--bg-panel);
+      color: var(--text-main);
+      font-size: 1rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px var(--gold-glow);
+    }
+
+    .preset-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .chip {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      color: var(--cyan);
+      font-size: 0.84rem;
+      padding: 5px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      font-family: inherit;
+    }
+
+    .chip:hover {
+      background: rgba(56, 189, 248, 0.22);
+      transform: translateY(-1px);
+    }
+
+    .error-msg {
+      color: var(--rose);
+      font-size: 0.88rem;
+      margin-top: 6px;
+      display: none;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #0b1120;
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+      box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+      transition: transform 0.18s, box-shadow 0.18s, filter 0.18s;
+      font-family: inherit;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.06);
+      box-shadow: 0 12px 26px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    /* System Broadcast Banner */
+    .broadcast-box {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(99, 102, 241, 0.12));
+      border: 1px solid rgba(56, 189, 248, 0.32);
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+
+    .broadcast-header {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .broadcast-text p {
+      font-size: 0.96rem;
+      color: var(--text-main);
+    }
+
+    .highlight-gold {
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .highlight-cyan {
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    /* Scoreboard */
+    .round-banner {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .round-pill {
+      display: inline-block;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      padding: 6px 18px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--gold);
+    }
+
+    .scoreboard {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 18px 16px;
+      margin-bottom: 22px;
+    }
+
+    .fighter-col {
+      text-align: center;
+    }
+
+    .fighter-name {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .fighter-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .score-num {
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+
+    .player-score { color: var(--emerald); }
+    .cpu-score { color: var(--rose); }
+
+    .win-pips {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .pip {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: rgba(148, 163, 184, 0.2);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      transition: all 0.3s ease;
+    }
+
+    .pip.active-player {
+      background: var(--emerald);
+      border-color: #6ee7b7;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.7);
+    }
+
+    .pip.active-cpu {
+      background: var(--rose);
+      border-color: #fda4af;
+      box-shadow: 0 0 10px rgba(244, 63, 94, 0.7);
+    }
+
+    .vs-divider {
+      font-weight: 900;
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      padding: 0 6px;
+    }
+
+    /* Battle Arena */
+    .arena-stage {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 12px;
+      background: rgba(11, 17, 32, 0.65);
+      border: 1px dashed rgba(148, 163, 184, 0.25);
+      border-radius: 16px;
+      padding: 20px 14px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .hand-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hand-emoji {
+      font-size: 3.2rem;
+      line-height: 1.1;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .hand-emoji.pop {
+      transform: scale(1.22);
+    }
+
+    .hand-label {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .round-result-banner {
+      text-align: center;
+      font-size: 1.08rem;
+      font-weight: 700;
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .res-win {
+      background: rgba(16, 185, 129, 0.14);
+      border-color: rgba(16, 185, 129, 0.45);
+      color: #6ee7b7;
+    }
+
+    .res-lose {
+      background: rgba(244, 63, 94, 0.14);
+      border-color: rgba(244, 63, 94, 0.45);
+      color: #fda4af;
+    }
+
+    .res-tie {
+      background: rgba(251, 191, 36, 0.12);
+      border-color: rgba(251, 191, 36, 0.4);
+      color: #fde68a;
+    }
+
+    /* Choice Buttons */
+    .choices-prompt {
+      text-align: center;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text-main);
+    }
+
+    .choices-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .choice-btn {
+      background: var(--bg-panel);
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      border-radius: 16px;
+      padding: 18px 10px;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.18s ease;
+      font-family: inherit;
+    }
+
+    .choice-btn:hover:not(:disabled) {
+      border-color: var(--gold);
+      background: rgba(251, 191, 36, 0.12);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
+    }
+
+    .choice-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .choice-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .choice-icon {
+      font-size: 2.4rem;
+    }
+
+    .choice-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .choice-key {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.6);
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    /* Final Result Box */
+    .final-box {
+      text-align: center;
+      padding: 24px 20px;
+      border-radius: 16px;
+      margin-top: 20px;
+      border: 1px solid var(--gold);
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.14), rgba(16, 185, 129, 0.12));
+    }
+
+    .final-box.cpu-won {
+      border-color: var(--rose);
+      background: linear-gradient(135deg, rgba(244, 63, 94, 0.14), rgba(30, 27, 75, 0.4));
+    }
+
+    .final-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    .final-box.cpu-won .final-title {
+      color: #fda4af;
+    }
+
+    .final-message {
+      font-size: 1.08rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .btn-secondary {
+      padding: 12px 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: var(--bg-panel);
+      color: var(--text-main);
+      font-size: 0.96rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s;
+      font-family: inherit;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    /* Console Log */
+    .console-card {
+      padding: 18px 20px;
+    }
+
+    .console-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .console-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .terminal {
+      background: #070b14;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-family: var(--font-mono);
+      font-size: 0.84rem;
+      color: #cbd5e1;
+      max-height: 240px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      line-height: 1.55;
+    }
+
+    .log-line-sys { color: #38bdf8; }
+    .log-line-win { color: #34d399; font-weight: 600; }
+    .log-line-lose { color: #fb7185; font-weight: 600; }
+    .log-line-tie { color: #fbbf24; }
+    .log-line-final { color: #fde047; font-weight: 700; }
+
+    /* Source Code Accordion */
+    details.code-viewer {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 16px 20px;
+    }
+
+    details.code-viewer summary {
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--cyan);
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    details.code-viewer summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details.code-viewer pre {
+      margin-top: 14px;
+      background: #070b14;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 12px;
+      padding: 14px;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: #e2e8f0;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 520px) {
+      .card { padding: 18px 14px; }
+      .hand-emoji { font-size: 2.5rem; }
+      .choice-icon { font-size: 2rem; }
+      .score-num { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">🐍 Python 互動網頁版</div>
+      <h1>✊✋✌️ 剪刀石頭布 終極大對決</h1>
+      <p>規則：先獲得 3 勝的一方就是最終贏家！</p>
+    </header>
+
+    <!-- STEP 1: 冒險者登入 -->
+    <section id="login-screen" class="card">
+      <div class="section-title">🛡️ 1. 冒險者登入</div>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="adventurer-name">請輸入你的冒險者名字：</label>
+          <input
+            type="text"
+            id="adventurer-name"
+            placeholder="例如：yi、勇者小智"
+            autocomplete="off"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="adventurer-equipment">請選擇你的使用裝備（例如：黃金鍵盤、魔法魔杖）：</label>
+          <input
+            type="text"
+            id="adventurer-equipment"
+            placeholder="輸入裝備名稱，或點擊下方快速裝備"
+            autocomplete="off"
+            required
+          />
+          <div class="preset-chips">
+            <button type="button" class="chip" data-equip="黃金鍵盤">⌨️ 黃金鍵盤</button>
+            <button type="button" class="chip" data-equip="魔法魔杖">🪄 魔法魔杖</button>
+            <button type="button" class="chip" data-equip="程式聖劍">🗡️ 程式聖劍</button>
+            <button type="button" class="chip" data-equip="量子護盾">🛡️ 量子護盾</button>
+          </div>
+          <div id="login-error" class="error-msg">⚠️ 請輸入冒險者名字與使用裝備！</div>
+        </div>
+
+        <button type="submit" class="btn-primary">⚔️ 進入競技場，開始挑戰！</button>
+      </form>
+    </section>
+
+    <!-- STEP 2: 對戰主畫面 -->
+    <section id="game-screen" class="card hidden">
+      <!-- 系統廣播 -->
+      <div class="broadcast-box">
+        <div class="broadcast-header">=== 系統廣播 ===</div>
+        <div class="broadcast-text">
+          <p>歡迎勇敢的冒險者【<span id="display-name" class="highlight-gold"></span>】！</p>
+          <p>你已經裝備了【<span id="display-equip" class="highlight-cyan"></span>】，準備好迎接第一關的 【猜拳】 挑戰！</p>
+        </div>
+      </div>
+
+      <!-- 回合顯示 -->
+      <div class="round-banner">
+        <span class="round-pill" id="round-display">--- 第 1 回合 ---</span>
+      </div>
+
+      <!-- 戰況記分板 -->
+      <div class="scoreboard">
+        <div class="fighter-col">
+          <div class="fighter-name" id="board-player-name">冒險者</div>
+          <div class="fighter-sub" id="board-player-equip">裝備：-</div>
+          <div class="score-num player-score" id="player-wins-num">0</div>
+          <div class="win-pips" id="player-pips">
+            <span class="pip"></span>
+            <span class="pip"></span>
+            <span class="pip"></span>
+          </div>
+        </div>
+
+        <div class="vs-divider">VS</div>
+
+        <div class="fighter-col">
+          <div class="fighter-name">🤖 電腦魔王</div>
+          <div class="fighter-sub">隨機演算法</div>
+          <div class="score-num cpu-score" id="cpu-wins-num">0</div>
+          <div class="win-pips" id="cpu-pips">
+            <span class="pip"></span>
+            <span class="pip"></span>
+            <span class="pip"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 出拳對決舞台 -->
+      <div class="arena-stage">
+        <div class="hand-box">
+          <div class="hand-emoji" id="player-hand-emoji">❔</div>
+          <div class="hand-label" id="player-hand-text">你尚未出拳</div>
+        </div>
+
+        <div class="vs-divider">⚡</div>
+
+        <div class="hand-box">
+          <div class="hand-emoji" id="cpu-hand-emoji">🤖</div>
+          <div class="hand-label" id="cpu-hand-text">等待電腦出拳</div>
+        </div>
+      </div>
+
+      <!-- 單回合結果提示 -->
+      <div class="round-result-banner" id="round-result-banner">
+        請選擇下方「剪刀、石頭 或 布」進行出拳！
+      </div>
+
+      <!-- 玩家出拳按鈕 -->
+      <div id="controls-area">
+        <div class="choices-prompt">請出拳 (點擊按鈕或按鍵盤 1 / 2 / 3)：</div>
+        <div class="choices-grid">
+          <button type="button" class="choice-btn" data-choice="剪刀">
+            <span class="choice-icon">✌️</span>
+            <span class="choice-name">剪刀</span>
+            <span class="choice-key">按鍵 1</span>
+          </button>
+          <button type="button" class="choice-btn" data-choice="石頭">
+            <span class="choice-icon">✊</span>
+            <span class="choice-name">石頭</span>
+            <span class="choice-key">按鍵 2</span>
+          </button>
+          <button type="button" class="choice-btn" data-choice="布">
+            <span class="choice-icon">✋</span>
+            <span class="choice-name">布</span>
+            <span class="choice-key">按鍵 3</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 最終結算區塊 -->
+      <div id="final-result-box" class="final-box hidden">
+        <div class="final-title">=== 🌟 最終結果 🌟 ===</div>
+        <div class="final-message" id="final-message-text"></div>
+        <div class="action-row">
+          <button type="button" class="btn-primary" style="width: auto; padding: 12px 24px;" id="btn-play-again">
+            🔄 再挑戰一次 (保留裝備)
+          </button>
+          <button type="button" class="btn-secondary" id="btn-change-player">
+            🛡️ 更換冒險者 / 裝備
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 系統終端機輸出紀錄 (對應 Python print 輸出) -->
+    <section class="card console-card">
+      <div class="console-header">
+        <div class="console-title">💻 Python 終端機即時輸出紀錄</div>
+      </div>
+      <div class="terminal" id="console-output">等待冒險者登入...</div>
+    </section>
+
+    <!-- 原始 Python 程式碼對照 -->
+    <details class="code-viewer">
+      <summary>
+        <span>📜 查看原始 Python 程式碼對照</span>
+        <span>▼</span>
+      </summary>
+      <pre><code>import random  # 召喚處理「隨機」的魔法模組
+
+# 1. 冒險者登入
+name = input("請輸入你的冒險者名字：")
+equipment = input("請選擇你的使用裝備（例如：黃金鍵盤、魔法魔杖）：")
+
+print("
+=== 系統廣播 ===")
+print(f"歡迎勇敢的冒險者【{name}】！")
+print(f"你已經裝備了【{equipment}】，準備好迎接第一關的 【猜拳】 挑戰！")
+
+print("
+
+=== ✊✋✌️ 剪刀石頭布 終極大對決 ===")
+print("規則：先獲得 3 勝的一方就是最終贏家！
+")
+
+player_wins = 0
+computer_wins = 0
+round_num = 1
+options = ["剪刀", "石頭", "布"]
+
+# 2. 迴圈條件設定
+while player_wins &lt; 3 and computer_wins &lt; 3:
+    print(f"--- 第 {round_num} 回合 ---")
+    print(f"🏆 目前戰況 - 你：{player_wins} 勝 | 電腦：{computer_wins} 勝")
+
+    player_choice = input("請出拳 (輸入 剪刀、石頭 或 布)：")
+    if player_choice != "剪刀" and player_choice != "石頭" and player_choice != "布":
+        print("⚠️ 哎呀！指令錯誤，請輸入 剪刀、石頭 或 布。
+")
+        continue
+
+    computer_choice = random.choice(options)
+    print(f"🤖 電腦出了：{computer_choice}")
+
+    if player_choice == computer_choice:
+        print("平手！沒有人得分。
+")
+    elif (player_choice == "剪刀" and computer_choice == "布") or          (player_choice == "石頭" and computer_choice == "剪刀") or          (player_choice == "布" and computer_choice == "石頭"):
+        print("🎉 這回合你贏了！
+")
+        player_wins = player_wins + 1
+    else:
+        print("💥 這回合電腦贏了！
+")
+        computer_wins = computer_wins + 1
+
+    round_num = round_num + 1
+
+# 6. 最終結算
+print("=== 🌟 最終結果 🌟 ===")
+if player_wins == 3:
+    print(f"🏆 恭喜你以 {player_wins} : {computer_wins} 擊敗了電腦，成為剪刀石頭布大師！")
+else:
+    print(f"💻 很可惜，電腦以 {computer_wins} : {player_wins} 獲得了最終勝利，下次再來挑戰吧！")</code></pre>
+    </details>
+  </div>
+
+  <script>
+    // 遊戲狀態變數 (對應 Python 變數)
+    let adventurerName = "";
+    let adventurerEquipment = "";
+    let playerWins = 0;
+    let computerWins = 0;
+    let roundNum = 1;
+    let gameOver = false;
+
+    const options = ["剪刀", "石頭", "布"];
+    const emojiMap = {
+      "剪刀": "✌️",
+      "石頭": "✊",
+      "布": "✋"
+    };
+
+    // DOM 元素
+    const loginScreen = document.getElementById("login-screen");
+    const gameScreen = document.getElementById("game-screen");
+    const loginForm = document.getElementById("login-form");
+    const nameInput = document.getElementById("adventurer-name");
+    const equipInput = document.getElementById("adventurer-equipment");
+    const loginError = document.getElementById("login-error");
+
+    const displayName = document.getElementById("display-name");
+    const displayEquip = document.getElementById("display-equip");
+    const boardPlayerName = document.getElementById("board-player-name");
+    const boardPlayerEquip = document.getElementById("board-player-equip");
+
+    const roundDisplay = document.getElementById("round-display");
+    const playerWinsNum = document.getElementById("player-wins-num");
+    const cpuWinsNum = document.getElementById("cpu-wins-num");
+    const playerPips = document.getElementById("player-pips").children;
+    const cpuPips = document.getElementById("cpu-pips").children;
+
+    const playerHandEmoji = document.getElementById("player-hand-emoji");
+    const playerHandText = document.getElementById("player-hand-text");
+    const cpuHandEmoji = document.getElementById("cpu-hand-emoji");
+    const cpuHandText = document.getElementById("cpu-hand-text");
+
+    const roundResultBanner = document.getElementById("round-result-banner");
+    const controlsArea = document.getElementById("controls-area");
+    const choiceButtons = document.querySelectorAll(".choice-btn");
+
+    const finalResultBox = document.getElementById("final-result-box");
+    const finalMessageText = document.getElementById("final-message-text");
+    const btnPlayAgain = document.getElementById("btn-play-again");
+    const btnChangePlayer = document.getElementById("btn-change-player");
+    const consoleOutput = document.getElementById("console-output");
+
+    // 快速裝備按鈕
+    document.querySelectorAll(".chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        equipInput.value = chip.dataset.equip;
+        equipInput.focus();
+      });
+    });
+
+    // 終端機日誌輔助函式
+    function appendLog(text, className = "") {
+      const span = document.createElement("div");
+      if (className) span.className = className;
+      span.textContent = text;
+      consoleOutput.appendChild(span);
+      consoleOutput.scrollTop = consoleOutput.scrollHeight;
+    }
+
+    function clearLog() {
+      consoleOutput.innerHTML = "";
+    }
+
+    // 更新記分板與回合顯示
+    function updateUI() {
+      roundDisplay.textContent = `--- 第 ${roundNum} 回合 ---`;
+      playerWinsNum.textContent = playerWins;
+      cpuWinsNum.textContent = computerWins;
+
+      for (let i = 0; i < 3; i++) {
+        playerPips[i].classList.toggle("active-player", i < playerWins);
+        cpuPips[i].classList.toggle("active-cpu", i < computerWins);
+      }
+    }
+
+    // 初始化 / 重置對戰
+    function startNewMatch() {
+      playerWins = 0;
+      computerWins = 0;
+      roundNum = 1;
+      gameOver = false;
+
+      displayName.textContent = adventurerName;
+      displayEquip.textContent = adventurerEquipment;
+      boardPlayerName.textContent = adventurerName;
+      boardPlayerEquip.textContent = `裝備：${adventurerEquipment}`;
+
+      playerHandEmoji.textContent = "❔";
+      playerHandText.textContent = "你尚未出拳";
+      cpuHandEmoji.textContent = "🤖";
+      cpuHandText.textContent = "等待電腦出拳";
+
+      roundResultBanner.className = "round-result-banner";
+      roundResultBanner.textContent = "請選擇下方「剪刀、石頭 或 布」進行出拳！";
+
+      controlsArea.classList.remove("hidden");
+      finalResultBox.classList.add("hidden");
+      finalResultBox.classList.remove("cpu-won");
+      choiceButtons.forEach((btn) => (btn.disabled = false));
+
+      updateUI();
+
+      clearLog();
+      appendLog(`請輸入你的冒險者名字：${adventurerName}`);
+      appendLog(`請選擇你的使用裝備：${adventurerEquipment}`);
+      appendLog("
+=== 系統廣播 ===", "log-line-sys");
+      appendLog(`歡迎勇敢的冒險者【${adventurerName}】！`, "log-line-sys");
+      appendLog(`你已經裝備了【${adventurerEquipment}】，準備好迎接第一關的 【猜拳】 挑戰！`, "log-line-sys");
+      appendLog("
+=== ✊✋✌️ 剪刀石頭布 終極大對決 ===");
+      appendLog("規則：先獲得 3 勝的一方就是最終贏家！
+");
+      appendLog(`--- 第 ${roundNum} 回合 ---`);
+      appendLog(`🏆 目前戰況 - 你：${playerWins} 勝 | 電腦：${computerWins} 勝`);
+    }
+
+    // 登入表單送出
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const nameVal = nameInput.value.trim();
+      const equipVal = equipInput.value.trim();
+
+      if (!nameVal || !equipVal) {
+        loginError.style.display = "block";
+        return;
+      }
+
+      loginError.style.display = "none";
+      adventurerName = nameVal;
+      adventurerEquipment = equipVal;
+
+      loginScreen.classList.add("hidden");
+      gameScreen.classList.remove("hidden");
+      startNewMatch();
+    });
+
+    // 執行一回合猜拳
+    function playRound(playerChoice) {
+      if (gameOver) return;
+
+      // 電腦隨機出拳
+      const computerChoice = options[Math.floor(Math.random() * options.length)];
+
+      // 更新舞台手勢與動畫
+      playerHandEmoji.textContent = emojiMap[playerChoice];
+      playerHandText.textContent = `你出了：${playerChoice}`;
+      cpuHandEmoji.textContent = emojiMap[computerChoice];
+      cpuHandText.textContent = `電腦出了：${computerChoice}`;
+
+      playerHandEmoji.classList.remove("pop");
+      cpuHandEmoji.classList.remove("pop");
+      void playerHandEmoji.offsetWidth; // trigger reflow
+      playerHandEmoji.classList.add("pop");
+      cpuHandEmoji.classList.add("pop");
+
+      appendLog(`請出拳：${playerChoice}`);
+      appendLog(`🤖 電腦出了：${computerChoice}`);
+
+      // 勝負判斷 (與 Python 邏輯完全一致)
+      if (playerChoice === computerChoice) {
+        roundResultBanner.className = "round-result-banner res-tie";
+        roundResultBanner.textContent = `平手！雙方都出了「${playerChoice}」，沒有人得分。`;
+        appendLog("平手！沒有人得分。
+", "log-line-tie");
+      } else if (
+        (playerChoice === "剪刀" && computerChoice === "布") ||
+        (playerChoice === "石頭" && computerChoice === "剪刀") ||
+        (playerChoice === "布" && computerChoice === "石頭")
+      ) {
+        playerWins += 1;
+        roundResultBanner.className = "round-result-banner res-win";
+        roundResultBanner.textContent = `🎉 這回合你贏了！（${playerChoice} 勝 ${computerChoice}）`;
+        appendLog("🎉 這回合你贏了！
+", "log-line-win");
+      } else {
+        computerWins += 1;
+        roundResultBanner.className = "round-result-banner res-lose";
+        roundResultBanner.textContent = `💥 這回合電腦贏了！（${computerChoice} 勝 ${playerChoice}）`;
+        appendLog("💥 這回合電腦贏了！
+", "log-line-lose");
+      }
+
+      roundNum += 1;
+      updateUI();
+
+      // 檢查是否有人達到 3 勝
+      if (playerWins === 3 || computerWins === 3) {
+        gameOver = true;
+        controlsArea.classList.add("hidden");
+        finalResultBox.classList.remove("hidden");
+        roundDisplay.textContent = "🏁 對決結束";
+
+        appendLog("=== 🌟 最終結果 🌟 ===", "log-line-final");
+        if (playerWins === 3) {
+          const msg = `🏆 恭喜你以 ${playerWins} : ${computerWins} 擊敗了電腦，成為剪刀石頭布大師！`;
+          finalMessageText.textContent = msg;
+          appendLog(msg, "log-line-win");
+        } else {
+          finalResultBox.classList.add("cpu-won");
+          const msg = `💻 很可惜，電腦以 ${computerWins} : ${playerWins} 獲得了最終勝利，下次再來挑戰吧！`;
+          finalMessageText.textContent = msg;
+          appendLog(msg, "log-line-lose");
+        }
+      } else {
+        appendLog(`--- 第 ${roundNum} 回合 ---`);
+        appendLog(`🏆 目前戰況 - 你：${playerWins} 勝 | 電腦：${computerWins} 勝`);
+      }
+    }
+
+    // 綁定出拳按鈕
+    choiceButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        playRound(btn.dataset.choice);
+      });
+    });
+
+    // 鍵盤快捷鍵支援 (1: 剪刀, 2: 石頭, 3: 布)
+    document.addEventListener("keydown", (e) => {
+      if (gameScreen.classList.contains("hidden") || gameOver) return;
+      if (e.key === "1") playRound("剪刀");
+      if (e.key === "2") playRound("石頭");
+      if (e.key === "3") playRound("布");
+    });
+
+    // 再玩一次 / 更換角色
+    btnPlayAgain.addEventListener("click", startNewMatch);
+    btnChangePlayer.addEventListener("click", () => {
+      gameScreen.classList.add("hidden");
+      loginScreen.classList.remove("hidden");
+      nameInput.focus();
+    });
+  </script>
+</body>
+</html>
